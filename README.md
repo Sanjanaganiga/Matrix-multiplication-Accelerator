@@ -18,22 +18,7 @@ Accumulates the result into a local register
 Forwards in_a to the PE on its right, and in_b to the PE below it (one cycle later)
 Clears its accumulator when clr is asserted
 
-
-
 matrix_mult_top module — instantiates 4 PEs in a 2×2 grid and wires them together with the correct diagonal skew, so each PE receives its operands at the right cycle to compute one element of the output matrix C.
-
-Systolic Array Block Diagram :
-
-a00        a10
-         │          │
-   ┌─────▼─────┐┌───▼───────┐
-b00┤  PE(0,0)  ││  PE(1,0)  │
-   └─────┬─────┘└───┬───────┘
-         │ a00→a01   │ a10→a11
-   ┌─────▼─────┐┌───▼───────┐
-b01┤  PE(0,1)  ││  PE(1,1)  │
-   └───────────┘└───────────┘
-
 
 ▶️ How to Run
 
