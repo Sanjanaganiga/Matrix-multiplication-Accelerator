@@ -1,0 +1,43 @@
+class agent;
+
+    // Sub-components instantiations matching your exact design layout
+    generator generator_inst; // Optional instantiation handle if you decide to package it within the agent wrapper
+    driver    driver_inst;
+    monitor   monitor_inst;
+
+    // Mailboxes parameterized using your custom unified transaction packet
+    mailbox#(transaction) generator2driver;
+    mailbox#(transaction) monitor2scoreboard;
+
+    // Virtual interface utilizing the updated systolic configuration
+    virtual systolic_if vif;
+    int num_transaction;
+
+    // Constructor matching your RAM style template exactly
+    function new(virtual systolic_if vif, 
+                 mailbox#(transaction) generator2driver, 
+                 mailbox#(transaction) monitor2scoreboard, 
+                 int num_transaction);
+        this.vif                = vif;
+        this.generator2driver   = generator2driver;
+        this.monitor2scoreboard = monitor2scoreboard;
+        this.num_transaction    = num_transaction;
+    endfunction
+
+    // Build function to allocate memory handles across structural units
+    function void build();
+        // Allocating verification components with identical constructor styles
+        driver_inst  = new(vif, generator2driver, num_transaction);
+        monitor_inst = new(vif, monitor2scoreboard, num_transaction);
+    endfunction
+
+    // Run task to launch sub-components concurrently using fork-join matching your reference style
+    task run();
+        fork
+            driver_inst.run();
+           
+          monitor_inst.run();
+        join
+    endtask
+
+endclass

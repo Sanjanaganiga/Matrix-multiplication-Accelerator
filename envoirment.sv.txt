@@ -1,0 +1,38 @@
+class environment;
+    virtual systolic_if vif;
+    int num_transaction;
+
+    generator  gen_inst;
+    driver     drv_inst;
+    monitor    mon_inst;
+    scoreboard scb_inst;
+
+    mailbox#(transaction) gen2drv;
+    mailbox#(transaction) gen2scb;
+    mailbox#(transaction) mon2scb;
+
+    function new(virtual systolic_if vif, int num_transaction);
+        this.vif = vif;
+        this.num_transaction = num_transaction;
+    endfunction
+
+    function void build();
+        gen2drv = new();
+        gen2scb = new();
+        mon2scb = new();
+
+        gen_inst = new(gen2drv, gen2scb, num_transaction);
+        drv_inst = new(vif, gen2drv, num_transaction);
+        mon_inst = new(vif, mon2scb, num_transaction);
+        scb_inst = new(gen2scb, mon2scb, num_transaction);
+    endfunction
+
+    task run();
+        fork
+            gen_inst.run();
+            drv_inst.run();
+            mon_inst.run();
+            scb_inst.run();
+        join
+    endtask
+endclass

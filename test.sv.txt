@@ -1,0 +1,19 @@
+class test;
+    environment e;
+    virtual systolic_if vif;
+    int num_transaction;
+
+    function new(virtual systolic_if vif, int num_transaction);
+        this.vif = vif;
+        this.num_transaction = num_transaction;
+    endfunction
+
+    function void build();
+        e = new(vif, num_transaction);
+        e.build();
+    endfunction
+
+    task run();
+        e.run();
+    endtask
+endclass

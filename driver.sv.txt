@@ -1,0 +1,42 @@
+class driver;
+    virtual systolic_if vif;
+    mailbox#(transaction) gen2drv;
+    int num_transaction;
+
+    function new(virtual systolic_if vif, mailbox#(transaction) gen2drv, int num_transaction);
+        this.vif = vif;
+        this.gen2drv = gen2drv;
+        this.num_transaction = num_transaction;
+    endfunction
+
+    task run();
+        transaction trans;
+        repeat (num_transaction) begin
+            gen2drv.get(trans);
+
+            @(posedge vif.clk);
+            vif.clr <= 1'b1;
+
+            @(posedge vif.clk);
+            vif.clr <= 1'b0;
+            vif.a00 <= trans.A[0][0];  vif.b00 <= trans.B[0][0];
+            vif.a10 <= 8'h00;          vif.b01 <= 8'h00;
+
+            @(posedge vif.clk);
+            vif.a00 <= trans.A[0][1];  vif.b00 <= trans.B[1][0];
+            vif.a10 <= trans.A[1][0];  vif.b01 <= trans.B[0][1];
+
+            @(posedge vif.clk);
+            vif.a00 <= 8'h00;          vif.b00 <= 8'h00;
+            vif.a10 <= trans.A[1][1];  vif.b01 <= trans.B[1][1];
+
+            @(posedge vif.clk);
+            vif.a10 <= 8'h00;          vif.b01 <= 8'h00;
+
+            @(posedge vif.clk);
+            @(posedge vif.clk);
+
+            $display("DRV: Fed matrices at time %0t", $time);
+        end
+    endtask
+endclass

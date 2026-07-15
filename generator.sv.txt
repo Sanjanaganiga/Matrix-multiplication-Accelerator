@@ -1,0 +1,27 @@
+class generator;
+    mailbox#(transaction) gen2drv;
+    mailbox#(transaction) gen2scb;
+    int num_transaction;
+
+    function new(mailbox#(transaction) gen2drv, mailbox#(transaction) gen2scb, int num_transaction);
+        this.gen2drv = gen2drv;
+        this.gen2scb = gen2scb;
+        this.num_transaction = num_transaction;
+    endfunction
+
+    task run();
+        transaction trans;
+        repeat (num_transaction) begin
+            trans = new();
+            if (!trans.randomize())
+              $fatal(1,"GEN: Randomization failed!");
+
+            trans.display("GEN: New Matrix");
+
+            // Same handle sent to both driver and scoreboard so the
+            // scoreboard knows the A/B that produced a given result.
+            gen2drv.put(trans);
+            gen2scb.put(trans);
+        end
+    endtask
+endclass

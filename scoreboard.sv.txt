@@ -1,0 +1,41 @@
+
+class scoreboard;
+    mailbox#(transaction) gen2scb;
+    mailbox#(transaction) mon2scb;
+    int num_transaction;
+
+    function new(mailbox#(transaction) gen2scb, mailbox#(transaction) mon2scb, int num_transaction);
+        this.gen2scb = gen2scb;
+        this.mon2scb = mon2scb;
+        this.num_transaction = num_transaction;
+    endfunction
+
+    task run();
+        transaction golden_trans;
+        transaction actual_trans;
+
+        repeat (num_transaction) begin
+            gen2scb.get(golden_trans);
+            mon2scb.get(actual_trans);
+
+            golden_trans.compute_golden();
+
+            if ((golden_trans.C_golden[0][0] == actual_trans.C_actual[0][0]) &&
+                (golden_trans.C_golden[0][1] == actual_trans.C_actual[0][1]) &&
+                (golden_trans.C_golden[1][0] == actual_trans.C_actual[1][0]) &&
+                (golden_trans.C_golden[1][1] == actual_trans.C_actual[1][1])) begin
+                $display("SCB: PASS | Expected C00=%0d,C01=%0d,C10=%0d,C11=%0d  Got C00=%0d,C01=%0d,C10=%0d,C11=%0d",
+                         golden_trans.C_golden[0][0], golden_trans.C_golden[0][1],
+                         golden_trans.C_golden[1][0], golden_trans.C_golden[1][1],
+                         actual_trans.C_actual[0][0], actual_trans.C_actual[0][1],
+                         actual_trans.C_actual[1][0], actual_trans.C_actual[1][1]);
+            end else begin
+                $display("SCB: FAIL | Expected C00=%0d,C01=%0d,C10=%0d,C11=%0d  Got C00=%0d,C01=%0d,C10=%0d,C11=%0d",
+                         golden_trans.C_golden[0][0], golden_trans.C_golden[0][1],
+                         golden_trans.C_golden[1][0], golden_trans.C_golden[1][1],
+                         actual_trans.C_actual[0][0], actual_trans.C_actual[0][1],
+                         actual_trans.C_actual[1][0], actual_trans.C_actual[1][1]);
+            end
+        end
+    endtask
+endclass
